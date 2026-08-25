@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bellwork — Kettlebell & Bodyweight Routines</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Sora:wght@400;500;600;650&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    @media print {
+      .sidebar, .actions, .filters, .nav, #modal-back, #view-library, #view-saved, #view-play { display: none !important; }
+      .app { display: block; }
+      .main { padding: 0; }
+      body { background: #fff; color: #111; }
+      .card, .ex-row, .block { background: #fff; border-color: #ccc; color: #111; }
+      .preview-list li { border-color: #ddd; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">B</div>
+        <div>
+          <h1>BELLWORK</h1>
+          <p>Bell + body</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <button data-view="build" class="active">Builder</button>
+        <button data-view="library">Exercise library</button>
+        <button data-view="saved">Saved sessions</button>
+        <button data-view="play">Timer</button>
+      </nav>
+      <div class="sidebar-foot">
+        Routines stay in this browser.<br />
+        Pair one bell with the floor — that's enough.
+      </div>
+    </aside>
+
+    <main class="main">
+      <section id="view-build" class="view">
+        <div class="topbar">
+          <div>
+            <h2>Builder</h2>
+            <div class="sub">Assemble a session or generate one from time, goal, and kit.</div>
+          </div>
+          <div class="actions">
+            <button class="btn ghost" id="btn-new">New</button>
+            <button class="btn" id="btn-generate">Generate</button>
+            <button class="btn" id="btn-print">Print</button>
+            <button class="btn" id="btn-save">Save</button>
+            <button class="btn primary" id="btn-start">Start session</button>
+          </div>
+        </div>
+        <p id="save-flash" class="sub"></p>
+
+        <div class="split">
+          <div>
+            <div class="card">
+              <div class="meta-grid">
+                <label class="field">Session name
+                  <input id="r-name" type="text" maxlength="80" />
+                </label>
+                <label class="field">Rounds (circuit)
+                  <input id="r-rounds" type="number" min="1" max="20" />
+                </label>
+                <label class="field">Notes
+                  <input id="r-notes" type="text" placeholder="Heavy swings, light get-ups…" />
+                </label>
+              </div>
+              <div class="format-pills">
+                <button class="pill" data-format="sets">Sets & reps</button>
+                <button class="pill" data-format="circuit">Circuit</button>
+                <button class="pill" data-format="emom">EMOM</button>
+                <button class="pill" data-format="amrap">AMRAP</button>
+              </div>
+              <p id="format-sets" class="sub">Each movement uses its own sets, reps, and rest.</p>
+              <p id="format-circuit" class="sub hidden">Run the list as a circuit. Rounds come from the field above.</p>
+              <div id="format-emom" class="hidden">
+                <label class="field">EMOM minutes
+                  <input id="r-emom" type="number" min="4" max="40" />
+                </label>
+                <p class="sub">One movement per minute, cycling the list.</p>
+              </div>
+              <div id="format-amrap" class="hidden">
+                <label class="field">AMRAP minutes
+                  <input id="r-amrap" type="number" min="4" max="40" />
+                </label>
+                <p class="sub">Repeat the list for the clock. Reps are the target each pass.</p>
+              </div>
+            </div>
+
+            <div class="block" style="margin-top:16px">
+              <div class="block-head">
+                <strong>Movements · sets · reps/sec · rest</strong>
+              </div>
+              <div id="item-list"></div>
+            </div>
+          </div>
+
+          <aside>
+            <div class="card">
+              <h3>Session snapshot</h3>
+              <div class="stat-row">
+                <div class="stat"><b id="stat-moves">0</b><span>Movements</span></div>
+                <div class="stat"><b id="stat-time">0m</b><span>Est. time</span></div>
+              </div>
+              <div class="stat" style="margin-bottom:14px"><b id="stat-format">Sets & reps</b><span>Format</span></div>
+              <ul class="preview-list" id="preview"></ul>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="view-library" class="view hidden">
+        <div class="topbar">
+          <div>
+            <h2>Library</h2>
+            <div class="sub" id="lib-count">Movements</div>
+          </div>
+        </div>
+        <div class="filters">
+          <input class="search" id="lib-search" type="text" placeholder="Search swings, get-ups, push-ups…" />
+          <select id="lib-eq">
+            <option value="">All equipment</option>
+            <option value="kb">Kettlebell</option>
+            <option value="bw">Bodyweight</option>
+          </select>
+          <select id="lib-pattern">
+            <option value="">All patterns</option>
+            <option value="hinge">Hinge</option>
+            <option value="squat">Squat</option>
+            <option value="lunge">Lunge</option>
+            <option value="push">Push</option>
+            <option value="pull">Pull</option>
+            <option value="carry">Carry</option>
+            <option value="core">Core</option>
+            <option value="conditioning">Conditioning</option>
+            <option value="mobility">Mobility</option>
+            <option value="skill">Skill</option>
+            <option value="locomotion">Locomotion</option>
+          </select>
+          <select id="lib-level">
+            <option value="">All levels</option>
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="grid" id="lib-grid"></div>
+      </section>
+
+      <section id="view-saved" class="view hidden">
+        <div class="topbar">
+          <div>
+            <h2>Saved</h2>
+            <div class="sub">Stored locally in this browser only.</div>
+          </div>
+        </div>
+        <div class="saved-list" id="saved-list"></div>
+      </section>
+
+      <section id="view-play" class="view hidden">
+        <div class="player">
+          <div class="phase" id="play-phase">Work</div>
+          <div class="clock" id="play-clock">00:00</div>
+          <div class="play-art" id="play-art"></div>
+          <div class="now-ex" id="play-title">Ready</div>
+          <div class="next-ex" id="play-detail"></div>
+          <div class="progress-track"><div class="progress-bar" id="play-bar"></div></div>
+          <div class="player-controls">
+            <button class="btn primary" id="play-toggle">Pause</button>
+            <button class="btn" id="play-skip">Skip</button>
+            <button class="btn ghost" id="play-exit">Back to builder</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-back hidden" id="modal-back">
+    <div class="modal">
+      <h3>Generate a session</h3>
+      <p class="sub">Pick constraints. Bellwork fills warmup + main work and balances patterns.</p>
+      <div class="form-grid">
+        <label class="field">Minutes
+          <select id="g-min">
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="30" selected>30</option>
+            <option value="45">45</option>
+            <option value="60">60</option>
+          </select>
+        </label>
+        <label class="field">Goal
+          <select id="g-goal">
+            <option value="mixed">Mixed</option>
+            <option value="strength">Strength</option>
+            <option value="conditioning">Conditioning</option>
+            <option value="mobility">Mobility / skill</option>
+          </select>
+        </label>
+        <label class="field">Equipment
+          <select id="g-eq">
+            <option value="mixed">Kettlebell + bodyweight</option>
+            <option value="kb">Kettlebell only</option>
+            <option value="bw">Bodyweight only</option>
+          </select>
+        </label>
+        <label class="field">Bells on hand
+          <select id="g-bells">
+            <option value="1">One</option>
+            <option value="2">A pair</option>
+          </select>
+        </label>
+        <label class="field">Level
+          <select id="g-level">
+            <option value="beginner">Beginner</option>
+            <option value="intermediate" selected>Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="btn-cancel-gen">Cancel</button>
+        <button class="btn primary" id="btn-run-gen">Build it</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="exercises.js"></script>
+  <script src="illustrations.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
