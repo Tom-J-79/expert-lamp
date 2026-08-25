@@ -107,7 +107,7 @@
 
   function art(id) {
     if (!id) return "";
-    return `<img class="ex-svg" alt="" src="art/${id}.gif">`;
+    return `<img class="ex-svg" alt="" src="art/${id}.gif" onerror="this.onerror=null;this.src='${id}.gif'">`;
   }
 
   function estimateMinutes(r) {
